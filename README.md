@@ -14,8 +14,13 @@ O foco estão nas principais bibliotecas para o carregamento dos dados, como:
  - from google.oauth2 import service_account [ Autenticação das credenciais ]
 -  from google.cloud import bigquery [ Caregamento dos dados no bigquery ]
 
+O primeiro script principal do projeto é o que faz o carregamento de bases de dados de arquivos, para esse caso csv ou xlsx. Os argumentos que deverão ser passados são 
+ - table: string com o nome da tabela que será atualizada ou criada no bigquery
+ - type_file: string com qual o tipo de arquivo
+ - file: string com o caminho do arquivo
+ - 
 # Importante 
 Algumas variaveis além da credencial também são muito importantes. Essas variaveis devem ficar alocadas no arquivo .env 
-BIGQUERY_DATASET_RAW [Nome do seu dataset criado no bigquery]
-GOOGLE_APPLICATION_CREDENTIALS [o json da credencial criada no GCP]
-PROJECT [O projeto usado no bigquery]
+ - BIGQUERY_DATASET_RAW [Nome do seu dataset criado no bigquery]
+ - GOOGLE_APPLICATION_CREDENTIALS [o json da credencial criada no GCP]
+ - PROJECT [O projeto usado no bigquery]
