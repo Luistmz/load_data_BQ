@@ -81,7 +81,7 @@ try:
     type_file = parse(args.type_file)
     file = parse(args.file)
 except ValueError:
-        print(f"O esta formato incorreto")
+        print(f"O formato esta incorreto")
         exit(1)
    
     
