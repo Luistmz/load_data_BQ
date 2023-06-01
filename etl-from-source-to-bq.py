@@ -2,7 +2,8 @@ from os import path, getenv
 from dotenv import load_dotenv
 import pandas as pd
 from google.oauth2 import service_account
-# from pandas.io.json._normalize import nested_to_record
+from argparse import ArgumentParser
+from dateutil.parser import parse
 from google.cloud import bigquery
 from datetime import datetime
 
@@ -18,9 +19,9 @@ credentials = service_account.Credentials.from_service_account_file(
 client = bigquery.Client(credentials=credentials, project=PROJECT)
 
 
-def main(extract_date, table, type_file, file):
+def main( table, type_file, file):
     #Extact data
-    print(f"extracting data day {extract_date}...")
+    print(f"verifiando type_file...")
     if type_file == 'csv':
         df = pd.read_csv(file)
     elif type_file == 'xls':
@@ -30,9 +31,9 @@ def main(extract_date, table, type_file, file):
 
     #Transform data
 
-    # df["extract_at_p"] = df["extract_at"]
+
     print(df.columns)
-    # df["extract_at_p"] = pd.to_datetime(df["extract_at_p"])
+    
 
     print(f"Saving {BIGQUERY_DATASET_RAW}.{table} in BigQuery...")
 
@@ -46,28 +47,42 @@ def main(extract_date, table, type_file, file):
             # time_partitioning=bigquery.table.TimePartitioning(
             #     type_="DAY", field="extract_at_p"),
         )
-
-    # p = extract_date.strftime("%Y%m%d")
-
-        # Include target partition in the table id:
-    # table_id = f"soma-dl-refined-online.farm_global_europa_raw.{table}${p}"
-    table_id = 'voltaic-country-384616.Dataset_raw.dados_csv'
+    table_id = f'{PROJECT}.{BIGQUERY_DATASET_RAW}.{table}'
 
     job = client.load_table_from_dataframe(
             df, table_id, job_config=job_config
         )  # Make an API request
 
     job.result()  # Wait for job to finish
-
+    print(f"Finished etl-from-source-to-bq...")
 
 if __name__ == "__main__":
 
+    parser = ArgumentParser()
 
-    extract_date = datetime.fromisoformat("2023-02-24")  # T00:00:00-04:00')
-    table = 'dados_csv'
-    type_file = 'csv'
-    file = 'Reviews.csv'
+    parser.add_argument("-t",
+                        "--table",
+                        help="Nome da tabela no bq",
+                        default='dados_csv')
+        
+    parser.add_argument("-tf",
+                        "--type_file",
+                        help="tipo de arquivo para ser carregado",
+                        default='csv')
+    
+    parser.add_argument("-f",
+                        "--file",
+                        help="Nome do arquivo para ser carregado",
+                        default='Reviews.csv')
+    
+args = parser.parse_args()
+try:
+    table = parse(args.table)
+    type_file = parse(args.type_file)
+    file = parse(args.file)
+except ValueError:
+        print(f"O esta formato incorreto")
+        exit(1)
    
-    # print(f"Starting {path.splitext(path.basename(__file__))[0]}...")
-    main(extract_date, table)
-    # print(f"Ended {path.splitext(path.basename(__file__))[0]}.")
+    
+main(table, type_file, file)
